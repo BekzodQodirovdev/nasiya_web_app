@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
     FolderOutlined,
     HomeOutlined,
@@ -8,15 +8,15 @@ import {
     UsergroupAddOutlined,
 } from "@ant-design/icons";
 import { Button, ConfigProvider, Layout, Menu, theme } from "antd";
-import { Outlet, useNavigate } from "react-router-dom";
-import { loadState } from "../config/storage";
-import { userT } from "../App";
+import { Outlet } from "react-router-dom";
+// import { loadState } from "../config/storage";
+// import { userT } from "../App";
 
 const { Header, Sider, Content } = Layout;
 
 export const MainLayout = () => {
-    const user: userT | undefined = loadState("user");
-    const navigate = useNavigate();
+    // const user: userT | undefined = loadState("user");
+    // const navigate = useNavigate();
 
     const [collapsed, setCollapsed] = useState(false);
     const {
