@@ -1,33 +1,30 @@
 import { Row, Col, Input, Button, Typography, Form } from "antd";
 import { useForm, Controller } from "react-hook-form";
 import LogoIcon from "../../assets/login.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLogin } from "./service/useLogin";
-import { useQueryClient } from "@tanstack/react-query";
 import { toast, ToastContainer } from "react-toastify";
 import React from "react";
+import { saveState } from "../../config/storage";
 
 export const LoginPage = () => {
     const {
         control,
-        reset,
         handleSubmit,
         formState: { errors },
     } = useForm();
 
+    const navigate = useNavigate();
+
     const [inputSt, setInputSt] = React.useState<boolean>(false);
 
     const { mutate, isPending } = useLogin();
-    const client = useQueryClient();
 
-    const onSubmit = (data: any) => {
-        mutate(data, {
-            onSuccess: () => {
-                reset();
-                client.invalidateQueries({ queryKey: ["user_data"] });
-                toast.success("Todo added successfully!", {
-                    position: "top-center",
-                });
+    const onSubmit = (userData: any) => {
+        mutate(userData, {
+            onSuccess: (data) => {
+                saveState("user", data);
+                navigate("/");
             },
             onError: (error) => {
                 // @ts-ignore
