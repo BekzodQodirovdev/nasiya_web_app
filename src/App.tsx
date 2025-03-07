@@ -2,6 +2,8 @@ import { Route, Routes } from "react-router-dom";
 import { LoginPage } from "./page/login/Login";
 import { Home } from "./page/home/Home";
 import { MainLayout } from "./layout/MainLayout";
+import { Debtor } from "./page/debtor/Debtor";
+import { NewDebtor } from "./page/debtor/NewDebtor";
 
 export interface userT {
     accessToken: string;
@@ -27,6 +29,8 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<MainLayout />}>
                 <Route index element={<Home />} />
+                <Route path="/debtor" element={<Debtor />} />
+                <Route path="/debtor/new" element={<NewDebtor />} />
             </Route>
         </Routes>
     );

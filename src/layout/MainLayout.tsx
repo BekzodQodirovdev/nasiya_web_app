@@ -8,7 +8,7 @@ import {
     UsergroupAddOutlined,
 } from "@ant-design/icons";
 import { Button, ConfigProvider, Layout, Menu, theme } from "antd";
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 // import { loadState } from "../config/storage";
 // import { userT } from "../App";
 
@@ -58,22 +58,22 @@ export const MainLayout = () => {
                             {
                                 key: "1",
                                 icon: <HomeOutlined />,
-                                label: "Asosiy",
+                                label: <Link to={"/"}>Asosiy</Link>,
                             },
                             {
                                 key: "2",
                                 icon: <UsergroupAddOutlined />,
-                                label: "Mijozlar",
+                                label: <Link to={"/debtor"}>Mijozlar</Link>,
                             },
                             {
                                 key: "3",
                                 icon: <FolderOutlined />,
-                                label: "Hisobot",
+                                label: <Link to={"/hisobot"}>Hisobot</Link>,
                             },
                             {
                                 key: "4",
                                 icon: <SettingOutlined />,
-                                label: "Sozlama",
+                                label: <Link to={"/sozlama"}>Sozlama</Link>,
                             },
                         ]}
                     />
