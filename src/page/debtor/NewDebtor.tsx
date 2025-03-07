@@ -92,7 +92,7 @@ export const NewDebtor = () => {
     useEffect(() => {
         form.setFieldsValue({ phone_numbers: [""] });
     }, [form]);
-    const { mutate, isPending } = useFileUpload();
+    const { mutate } = useFileUpload();
     const onFinish = (values: any) => {
         console.log("Received values of form:", values);
         console.log("File List:", fileList);
