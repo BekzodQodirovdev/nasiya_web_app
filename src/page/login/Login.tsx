@@ -3,7 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import LogoIcon from "../../assets/login.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useLogin } from "./service/useLogin";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import React from "react";
 import { saveState } from "../../config/storage";
 
@@ -46,7 +46,6 @@ export const LoginPage = () => {
                 background: "#f5f7fa",
             }}
         >
-            <ToastContainer />
             <Col
                 style={{
                     borderRadius: "16px",

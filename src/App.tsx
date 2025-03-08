@@ -4,6 +4,7 @@ import { Home } from "./page/home/Home";
 import { MainLayout } from "./layout/MainLayout";
 import { Debtor } from "./page/debtor/Debtor";
 import { NewDebtor } from "./page/debtor/NewDebtor";
+import Debts from "./page/debts/Debts";
 
 export interface userT {
     accessToken: string;
@@ -31,6 +32,7 @@ function App() {
                 <Route index element={<Home />} />
                 <Route path="/debtor" element={<Debtor />} />
                 <Route path="/debtor/new" element={<NewDebtor />} />
+                <Route path="/debts/:id" element={<Debts />} />
             </Route>
         </Routes>
     );

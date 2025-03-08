@@ -1,81 +1,32 @@
 import React, { useEffect } from "react";
-import type { FormInstance } from "antd";
-import { Button, Form, Input, Space } from "antd";
+import { Button, Form, Input, Space, Upload, Image } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { Image, Upload } from "antd";
-import type { GetProp, UploadFile, UploadProps } from "antd";
-import { useFileUpload } from "./service/useFileUpload";
-
-interface SubmitButtonProps {
-    form: FormInstance;
-}
-
-const SubmitButton: React.FC<React.PropsWithChildren<SubmitButtonProps>> = ({
-    form,
-    children,
-}) => {
-    const [submittable, setSubmittable] = React.useState<boolean>(false);
-
-    const values = Form.useWatch([], form);
-
-    React.useEffect(() => {
-        form.validateFields({ validateOnly: true })
-            .then(() => setSubmittable(true))
-            .catch(() => setSubmittable(false));
-    }, [form, values]);
-
-    return (
-        <Button type="primary" htmlType="submit" disabled={!submittable}>
-            {children}
-        </Button>
-    );
-};
-
-const formItemLayout = {
-    labelCol: {
-        xs: { span: 24 },
-        sm: { span: 4 },
-    },
-    wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 20 },
-    },
-};
-
-const formItemLayoutWithOutLabel = {
-    labelCol: {
-        xs: { span: 24 },
-        sm: { span: 4 },
-    },
-    wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 20 },
-    },
-};
-
-type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
-
-const getBase64 = (file: FileType): Promise<string> =>
-    new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = (error) => reject(error);
-    });
+import { toast } from "react-toastify";
+import useFileUpload from "./service/useFileUpload";
+import usePostData from "./service/usePostData";
+import { useNavigate } from "react-router-dom";
+import type { UploadFile, UploadProps } from "antd";
 
 export const NewDebtor = () => {
     const [form] = Form.useForm();
+    const navigate = useNavigate();
 
     const [previewOpen, setPreviewOpen] = React.useState(false);
     const [previewImage, setPreviewImage] = React.useState("");
     const [fileList, setFileList] = React.useState<UploadFile[]>([]);
 
-    const handlePreview = async (file: UploadFile) => {
-        if (!file.url && !file.preview) {
-            file.preview = await getBase64(file.originFileObj as FileType);
-        }
+    useEffect(() => {
+        form.setFieldsValue({ phone_numbers: [""] });
+    }, [form]);
 
-        setPreviewImage(file.url || (file.preview as string));
+    const { mutate: uploadFiles } = useFileUpload();
+    const { mutate: postData } = usePostData();
+
+    const handlePreview = async (file: UploadFile) => {
+        if (!file.url && !file.preview && file.originFileObj) {
+            file.preview = (await getBase64(file.originFileObj)) as string;
+        }
+        setPreviewImage(file.url || file.preview || "");
         setPreviewOpen(true);
     };
 
@@ -89,42 +40,73 @@ export const NewDebtor = () => {
         </button>
     );
 
-    useEffect(() => {
-        form.setFieldsValue({ phone_numbers: [""] });
-    }, [form]);
-    const { mutate } = useFileUpload();
-    const onFinish = (values: any) => {
-        console.log("Received values of form:", values);
-        console.log("File List:", fileList);
+    const getBase64 = (file: File) =>
+        new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+        });
 
-        mutate(fileList, {
+    const onFinish = (values: any) => {
+        if (fileList.length !== 2) {
+            toast.error("2 images must be uploaded", {
+                position: "top-center",
+            });
+            return;
+        }
+
+        const formData = new FormData();
+        fileList.forEach((file) => {
+            if (!file.originFileObj) return;
+            formData.append("files", file.originFileObj as Blob, file.name);
+        });
+
+        uploadFiles(formData, {
             onSuccess: (filePath) => {
-                console.log(filePath);
+                const images = filePath.map(
+                    (item: {
+                        path: string;
+                        filename: string;
+                        originalname: string;
+                    }) => item.path
+                );
+                postData(
+                    { ...values, images },
+                    {
+                        onSuccess: (response: any) => {
+                            toast.success(response?.message, {
+                                position: "top-center",
+                            });
+                            navigate("/debtor");
+                        },
+                        onError: (err: any) => {
+                            toast.error(err?.response?.data?.error?.message, {
+                                position: "top-center",
+                            });
+                        },
+                    }
+                );
             },
-            onError: (err) => {
-                console.log(err);
+            onError: (err: any) => {
+                toast.error(err?.response?.data?.error?.message);
             },
         });
-    };
-
-    const onFinishFailed = (errorInfo: any) => {
-        console.log("Failed:", errorInfo);
     };
 
     return (
         <Form
             form={form}
-            variant="outlined"
-            name="validateOnly"
+            name="debtor_form"
             layout="vertical"
             autoComplete="off"
             onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
+            style={{ width: "50%" }}
         >
             <Form.Item
                 name="full_name"
                 label="Ismi"
-                rules={[{ required: true }]}
+                rules={[{ required: true, message: "Ism kiritilishi shart!" }]}
             >
                 <Input />
             </Form.Item>
@@ -132,45 +114,54 @@ export const NewDebtor = () => {
             <Form.List name="phone_numbers">
                 {(fields, { add, remove }, { errors }) => (
                     <>
-                        {fields.map((field, index) => (
+                        {fields.map((field) => (
                             <Form.Item
-                                {...(index === 0
-                                    ? formItemLayout
-                                    : formItemLayoutWithOutLabel)}
-                                label={index === 0 ? "Telefon raqami" : ""}
-                                required={true}
                                 key={field.key}
+                                style={{ marginBottom: "5px" }}
                             >
-                                <Form.Item
-                                    {...field}
-                                    validateTrigger={["onChange", "onBlur"]}
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "phone is required",
-                                            whitespace: true,
-                                        },
-                                    ]}
-                                    noStyle
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",
+                                    }}
                                 >
-                                    <Input style={{ width: "60%" }} />
-                                </Form.Item>
-                                {fields.length > 1 ? (
-                                    <MinusCircleOutlined
-                                        className="dynamic-delete-button"
-                                        onClick={() => remove(field.name)}
-                                    />
-                                ) : null}
+                                    <Form.Item
+                                        {...field}
+                                        validateTrigger={["onChange", "onBlur"]}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message:
+                                                    "Telefon raqam majburiy!",
+                                            },
+                                        ]}
+                                        noStyle
+                                    >
+                                        <Input placeholder="Telefon raqami" />
+                                    </Form.Item>
+
+                                    {fields.length > 1 && (
+                                        <MinusCircleOutlined
+                                            style={{
+                                                color: "red",
+                                                fontSize: "18px",
+                                                cursor: "pointer",
+                                            }}
+                                            onClick={() => remove(field.name)}
+                                        />
+                                    )}
+                                </div>
                             </Form.Item>
                         ))}
                         <Form.Item>
                             <Button
                                 type="dashed"
                                 onClick={() => add()}
-                                style={{ width: "50%" }}
                                 icon={<PlusOutlined />}
+                                style={{ width: "100%" }}
                             >
-                                Add field
+                                Raqam qo'shish
                             </Button>
                             <Form.ErrorList errors={errors} />
                         </Form.Item>
@@ -181,13 +172,23 @@ export const NewDebtor = () => {
             <Form.Item
                 name="address"
                 label="Yashash manzili"
-                rules={[{ required: true }]}
+                rules={[
+                    { required: true, message: "Manzil kiritilishi shart!" },
+                ]}
             >
                 <Input />
             </Form.Item>
-            <Form.Item name={"description"} label="Eslatma">
+
+            <Form.Item
+                name="description"
+                label="Eslatma"
+                rules={[
+                    { required: true, message: "Eslatma kiritilishi shart!" },
+                ]}
+            >
                 <Input.TextArea />
             </Form.Item>
+
             <Upload
                 listType="picture-card"
                 fileList={fileList}
@@ -198,6 +199,7 @@ export const NewDebtor = () => {
             >
                 {fileList.length >= 2 ? null : uploadButton}
             </Upload>
+
             {previewImage && (
                 <Image
                     wrapperStyle={{ display: "none" }}
@@ -213,7 +215,9 @@ export const NewDebtor = () => {
 
             <Form.Item style={{ paddingTop: "20px" }}>
                 <Space>
-                    <SubmitButton form={form}>Submit</SubmitButton>
+                    <Button type="primary" htmlType="submit">
+                        Submit
+                    </Button>
                     <Button htmlType="reset">Reset</Button>
                 </Space>
             </Form.Item>

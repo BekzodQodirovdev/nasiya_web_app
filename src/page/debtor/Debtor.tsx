@@ -1,8 +1,8 @@
 import { Button, Col, Input, Row } from "antd";
 import { SearchProps } from "antd/es/input";
 import userCreateIcon from "../../assets/svg/userCreate.svg";
-import { CardCompo } from "./components/card";
 import { useNavigate } from "react-router-dom";
+import TableCompts from "./components/Table";
 
 const { Search } = Input;
 
@@ -42,11 +42,10 @@ export const Debtor = () => {
                     Yaratish
                 </Button>
             </Row>
-            <Row gutter={[48, 48]} style={{ paddingTop: "40px", gap: "40px" }}>
-                <Col span={5}>
-                    <CardCompo />
-                </Col>
-            </Row>
+
+            <Col style={{ paddingTop: "50px" }}>
+                <TableCompts />
+            </Col>
         </Row>
     );
 };

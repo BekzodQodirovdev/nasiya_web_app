@@ -1,9 +1,17 @@
 import { useMutation } from "@tanstack/react-query";
 import { request } from "../../../config/request";
 
-export const useFileUpload = () => {
+const useFileUpload = () => {
     return useMutation({
         mutationFn: (data: any) =>
-            request.post("/api/upload", data).then((res) => res.data),
+            request
+                .post("/api/upload", data, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                })
+                .then((res) => res.data),
     });
 };
+
+export default useFileUpload;
