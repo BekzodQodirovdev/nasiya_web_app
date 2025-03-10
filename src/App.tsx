@@ -5,6 +5,7 @@ import { MainLayout } from "./layout/MainLayout";
 import { Debtor } from "./page/debtor/Debtor";
 import { NewDebtor } from "./page/debtor/NewDebtor";
 import Debts from "./page/debts/Debts";
+import DebtsNew from "./page/debts/components/DebtsNew";
 
 export interface userT {
     accessToken: string;
@@ -33,6 +34,7 @@ function App() {
                 <Route path="/debtor" element={<Debtor />} />
                 <Route path="/debtor/new" element={<NewDebtor />} />
                 <Route path="/debts/:id" element={<Debts />} />
+                <Route path="/debts/new/:id" element={<DebtsNew />} />
             </Route>
         </Routes>
     );

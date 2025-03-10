@@ -17,9 +17,9 @@ export const Debtor = () => {
                 style={{ justifyContent: "space-around", alignItems: "center" }}
             >
                 <Search
-                    placeholder="input search text"
+                    placeholder="Qidirish"
                     allowClear
-                    enterButton="Search"
+                    enterButton="Qidirish"
                     size="large"
                     onSearch={onSearch}
                     style={{ width: "70%" }}

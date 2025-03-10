@@ -3,11 +3,12 @@ import { Image, Table } from "antd";
 import type { TableProps } from "antd";
 import { useGetAllDebtor } from "../service/useGetAlldebtor";
 import { useNavigate } from "react-router-dom";
+import { DebtsType } from "../../debts/components/Table";
 
 export interface DataType {
     address: string;
     created_at: string;
-    debts: object[];
+    debts: DebtsType[];
     description: string;
     full_name: string;
     id: string;
@@ -27,58 +28,72 @@ export interface DataType {
 }
 
 const TableCompts: React.FC = () => {
-    const { data, isLoading } = useGetAllDebtor();
+    const { data } = useGetAllDebtor();
+    console.log(data);
+
     const navigate = useNavigate();
 
     const columns: TableProps<DataType>["columns"] = [
         {
-            title: "Full Name",
+            title: "To'liq ism",
             dataIndex: "full_name",
             key: "full_name",
         },
         {
-            title: "Address",
+            title: "Yashash manzili",
             dataIndex: "address",
             key: "address",
         },
         {
-            title: "Description",
+            title: "Eslatma",
             dataIndex: "description",
             key: "description",
         },
         {
-            title: "Image",
+            title: "Rasmlar",
             dataIndex: "images",
             key: "images",
             render: (images) =>
-                images?.length ? (
-                    <Image
-                        alt="img"
-                        src={images[0].image}
-                        style={{ width: "50px" }}
-                    />
-                ) : (
-                    "No Image"
-                ),
+                images?.length
+                    ? images.map((img: { id: string; image: string }) => (
+                          <Image
+                              key={img.id}
+                              alt="img"
+                              src={img.image}
+                              style={{ width: "50px", marginRight: "5px" }}
+                          />
+                      ))
+                    : "No Image",
         },
         {
-            title: "Add debts",
+            title: "Ko'rish",
             key: "adddebts",
             dataIndex: "id",
             render: (id) => (
-                <button onClick={() => navigate(`/debts/${id}`)}>
-                    Add debts
+                <button
+                    onClick={() => navigate(`/debts/${id}`)}
+                    style={{
+                        padding: "10px",
+                        cursor: "pointer",
+                        color: "white",
+                        backgroundColor: "#1677ff",
+                        border: "none",
+                        borderRadius: "5px",
+                    }}
+                >
+                    Ko'rish
                 </button>
             ),
         },
     ];
 
-    if (isLoading) return <p>Loading...</p>;
-
     return (
         <Table<DataType>
             columns={columns}
-            dataSource={data?.data || []}
+            dataSource={
+                data?.data?.map((item, index) => ({ ...item, key: index })) ||
+                []
+            }
             rowKey="id"
         />
     );

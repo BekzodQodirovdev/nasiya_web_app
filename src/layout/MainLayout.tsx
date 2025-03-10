@@ -53,6 +53,7 @@ export const MainLayout = () => {
                         defaultSelectedKeys={["1"]}
                         style={{
                             height: "100vh",
+                            overflowX: "auto",
                         }}
                         items={[
                             {
@@ -83,7 +84,7 @@ export const MainLayout = () => {
                 <Header
                     style={{
                         padding: 0,
-                        background: colorBgContainer,
+                        background: "#ffffff",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
@@ -119,8 +120,9 @@ export const MainLayout = () => {
                         margin: "24px 16px",
                         padding: 24,
                         minHeight: 280,
-                        background: "#f0f2f5",
+
                         borderRadius: borderRadiusLG,
+                        overflowX: "auto",
                     }}
                 >
                     <Outlet />
