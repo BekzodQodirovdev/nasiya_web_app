@@ -1,7 +1,8 @@
-import { Image, Table, TableProps } from "antd";
+import { Button, Image, Table, TableProps, Tag } from "antd";
 import React from "react";
 import { DebtPeriod, DebtStatus } from "../enum/debtPeriod";
 import { useGetOneDebtor } from "../service/useGetOneDebtor";
+import { useNavigate } from "react-router-dom";
 
 export interface DebtsType {
     next_payment_date: Date;
@@ -13,11 +14,12 @@ export interface DebtsType {
     images: { image: string }[];
     debtor: string;
     debt_status: DebtStatus;
+    id: string;
 }
 
 export const TableCom: React.FC<{ id: string }> = ({ id }) => {
     const { data } = useGetOneDebtor(id);
-    console.log(data);
+    const navigate = useNavigate();
 
     const columns: TableProps<DebtsType>["columns"] = [
         {
@@ -47,9 +49,32 @@ export const TableCom: React.FC<{ id: string }> = ({ id }) => {
                     : "No Image",
         },
         {
+            title: "Keyingi to'lov sanasi",
+            dataIndex: "next_payment_date",
+            key: "next_payment_date",
+        },
+        {
             title: "Holati",
             dataIndex: "debt_status",
             key: "debt_status",
+            render: (debt_status) => (
+                <Tag
+                    color={debt_status == "active" ? "green" : "red"}
+                    key={"tag"}
+                >
+                    {debt_status}
+                </Tag>
+            ),
+        },
+        {
+            title: "To'lash",
+            key: "button",
+            dataIndex: "id",
+            render: (debtId) => (
+                <Button onClick={() => navigate(`/debts/payment/${debtId}`)}>
+                    To'lash
+                </Button>
+            ),
         },
     ];
 

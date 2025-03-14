@@ -214,4 +214,4 @@ export const LoginPage = () => {
             </Col>
         </Row>
     );
-};
+};1

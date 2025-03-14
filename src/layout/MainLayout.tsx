@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, Outlet } from "react-router-dom";
 import {
     FolderOutlined,
     HomeOutlined,
@@ -8,35 +9,67 @@ import {
     UsergroupAddOutlined,
 } from "@ant-design/icons";
 import { Button, ConfigProvider, Layout, Menu, theme } from "antd";
-import { Link, Outlet } from "react-router-dom";
-// import { loadState } from "../config/storage";
-// import { userT } from "../App";
+import { userT } from "../App";
+import { loadState } from "../config/storage";
 
 const { Header, Sider, Content } = Layout;
 
 export const MainLayout = () => {
-    // const user: userT | undefined = loadState("user");
-    // const navigate = useNavigate();
-
+    const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
+    const [user, setUser] = useState<userT | null>(null);
+
     const {
-        token: { colorBgContainer, borderRadiusLG },
+        token: { borderRadiusLG },
     } = theme.useToken();
 
-    // useEffect(() => {
-    //     if (!user) {
-    //         navigate("/login");
-    //     }
-    // }, [user, navigate]);
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
 
-    // if (!user) {
-    //     return null;
-    // }
+        if (!storedUser) {
+            navigate("/login");
+            return;
+        }
+
+        try {
+            const parsedUser: userT = JSON.parse(storedUser);
+            if (
+                !parsedUser.accessToken ||
+                checkTokenExpiration(parsedUser.accessToken)
+            ) {
+                navigate("/login");
+            } else {
+                setUser(parsedUser);
+            }
+        } catch (error) {
+            console.error(
+                "Foydalanuvchi ma’lumotlarini tahlil qilishda xatolik:",
+                error
+            );
+            navigate("/login");
+        }
+    }, [navigate]);
+
+    const checkTokenExpiration = (token: string): boolean => {
+        try {
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            const exp = payload.exp * 1000;
+            return Date.now() >= exp;
+        } catch (error) {
+            console.error("Tokenni tahlil qilishda xatolik:", error);
+            return true;
+        }
+    };
+
+    if (!user) {
+        return null;
+    }
+
+    const { store } = loadState("user");
 
     return (
         <Layout style={{ height: "100vh" }}>
             <Sider trigger={null} collapsible collapsed={collapsed}>
-                <div className="demo-logo-vertical" />
                 <ConfigProvider
                     theme={{
                         components: {
@@ -51,10 +84,7 @@ export const MainLayout = () => {
                     <Menu
                         mode="inline"
                         defaultSelectedKeys={["1"]}
-                        style={{
-                            height: "100vh",
-                            overflowX: "auto",
-                        }}
+                        style={{ height: "100vh", overflowX: "auto" }}
                         items={[
                             {
                                 key: "1",
@@ -100,11 +130,7 @@ export const MainLayout = () => {
                             )
                         }
                         onClick={() => setCollapsed(!collapsed)}
-                        style={{
-                            fontSize: "16px",
-                            width: 64,
-                            height: 64,
-                        }}
+                        style={{ fontSize: "16px", width: 64, height: 64 }}
                     />
                     <Button
                         style={{
@@ -112,15 +138,22 @@ export const MainLayout = () => {
                             height: "30px",
                             borderRadius: "50%",
                             marginRight: "20px",
+                            overflow: "hidden",
                         }}
-                    ></Button>
+                    >
+                        <img
+                            src={store.image}
+                            width={30}
+                            height={30}
+                            alt="user img"
+                        />
+                    </Button>
                 </Header>
                 <Content
                     style={{
                         margin: "24px 16px",
                         padding: 24,
                         minHeight: 280,
-
                         borderRadius: borderRadiusLG,
                         overflowX: "auto",
                     }}

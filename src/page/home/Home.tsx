@@ -9,7 +9,7 @@ import { useStatistics } from "./service/useGetStatistics";
 import { loadState } from "../../config/storage";
 
 export const Home = () => {
-    const [state, setState] = React.useState<boolean>(false);
+    const [state, setState] = React.useState<boolean>(true);
     const { data, isLoading } = useStatistics();
     const userWallet = loadState("user")?.store?.wallet;
     console.log(data?.data);
